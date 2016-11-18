@@ -1,0 +1,241 @@
+<imports >
+    <link rel="import" href="../polymer/polymer.html">
+    <link rel="import" href="../ajax-manager/ajax-manager.html">
+    <link rel="import" href="../paper-input/paper-input.html" >
+    <link rel="import" href="../base-layout/base-layout.html">
+    <link rel="import" href="../iron-ajax/iron-ajax.html" async>
+    <link rel="import" href="../recording-card/recording-card.html" async>
+    <link rel="import" href="../collection-dialog/collection-dialog.html" async>
+    <link rel="import" href="../prompt-dialog/prompt-dialog.html">
+    <link rel="import" href="../paper-icon-button/paper-icon-button.html" async>
+    <link rel="import" href="../paper-input/paper-textarea.html" async>
+    <link rel="import" href="../paper-spinner/paper-spinner-lite.html" async>
+    <link rel="import" href="../iron-icon/iron-icon.html" async >
+    <link rel="import" href="../iron-icons/iron-icons.html" async>
+</imports>
+<icon-imports >
+    <link rel="import" href="../iron-icons/hardware-icons.html" async>
+    <link rel="import" href="../iron-icons/social-icons.html" async>
+    <link rel="import" href="../iron-icons/image-icons.html" async>
+    <link rel="import" href="../iron-icons/av-icons.html" async>
+    <link rel="import" href="../iron-icons/communication-icons.html" async>
+</icon-imports>
+<!--
+
+Shows drop down menu (works on chrome)
+
+### Usage
+The list displayed in the drop down menu can be set as an attribute.
+
+    <drop-menu list-items='["first" ,"second"]'></drop-menu>
+
+For an overlayed drop menu:
+
+    <drop-menu overlay-menu list-items='["first" ,"second"]'></drop-menu>
+
+### Styling
+ Custom property | Description | Default
+----------------|-------------|----------
+`--item-background-color` | List item backround color | `#f1ecef`
+`--item-color` | List item color used for fonts | `#302f31`
+`--close-color` | Icon button hover color | `4775D1`
+`--content-background` | Drop menu's background color | `white`
+`--close-color` | Icon button hover color | `4775D1`
+`--icon-button` | Mixin applied the icon button | `{}`
+
+@demo demo/drop-menu-demo.html
+-->
+<dom-module id="recording-list">
+    <template>
+        <styles >
+            <style dialog>
+                [dialog-content]{
+                    width: 90% ;
+                }
+                paper-input{
+                    margin-bottom: 10px ;
+                    --paper-input-container-label: {
+                        color: var(--title-color);
+                        font-size: 16px;
+                        font-weight: 300;
+                    };
+                    --paper-input-container-input: {
+                        color: var(--title-color);
+                        font-size: 18px;
+                        font-weight: 300;
+                    };
+                }
+                paper-textarea{
+                    font-size: 30px;
+                    --iron-autogrow-textarea: {
+                        color: var(--title-color);
+                        font-size: 18px;
+                        font-weight: 300;
+                    };
+                }
+            </style>
+            <style >
+                [message-holder] {
+                    width: 100%;
+                    font-size: 19px ;
+                    @apply(--layout-horizontal);
+                    @apply(--layout-center-justified);
+                    @apply(--layout-center);
+                    margin-top: 20px;
+                    color:var(--title-color) ;
+                }
+                [content] {
+                    margin-top: 0;
+                }
+                [spinner] {
+                    height: 80%;
+                    width: 100%;
+                    margin-top: 3vh;
+                    @apply(--layout-horizontal);
+                    @apply(--layout-center-justified);
+                    @apply(--layout-center);
+                }
+                [header]{
+                    width: 100% ;
+                }
+            </style>
+        </styles>
+        <dialogs >
+            <prompt-dialog id="deleteDialog" confirm-button="eliminar" cancel-button="cancelar"></prompt-dialog>
+            <prompt-dialog dialog-title="Editar grabaciòn" id="editDialog" confirm-button="editar" cancel-button="cancelar">
+                <div content dialog-content>
+                    <paper-input label="Titulo" value="{{editTitle}}"></paper-input>
+                    <paper-input label="Categoria" value="{{editCategory}}"></paper-input>
+                    <paper-textarea rows='3' label="Descripciòn" value="{{editDescription}}"></paper-textarea>
+                </div>
+            </prompt-dialog>
+            <collection-dialog parent={{recordingList}} id="dialog"></collection-dialog>
+        </dialogs>
+        <ajax-manager id="ajax" response={{recordings}} request="{{recordingList}}" loading={{loading}}></ajax-manager>
+        <iron-ajax id="ajaxExtra" url="http://localhost:3000/data/{{extra}}.json" handle-as="json" loading="{{loading}}" on-response="_didRespond"></iron-ajax>
+        <base-layout id="baseLayout" exit-icon="{{exitIcon}}"  with-header$="{{withHeader}}" header="{{recordings.title}}">
+            <div header>
+                <content select="[header]"></content>
+            </div>
+            <div content>
+                <template is="dom-if" if="[[!loading]]" >
+                    <template is="dom-if" if="[[!recordings.list.length]]">
+                        <div message-holder>
+                            La lista esta vacia
+                        </div>
+                    </template>
+                </template>
+                <template id="domRepeat" list is="dom-repeat" items="{{recordings.list}}" as="recording">
+                    <recording-card
+                        icon1={{icon1}}
+                        icon2={{icon2}}
+                        icon3={{icon3}}
+                        recording-user="{{recording.user}}"
+                        recording-title="{{recording.title}}"
+                        recording-views="{{recording.views}}"
+                        recording-votes="{{recording.votes}}"
+                        recording-score="{{recording.score}}"
+                        recording-date={{recording.date}}
+                        recording-category={{recording.category}}
+                        recording-duration={{recording.duration}}
+                        recording-comments={{recording.comments}}
+                        recording-id={{recording.id}}
+                        recording-description={{recording.description}}
+                        id="recording_{{index}}"></recording-card>
+                </template>
+                <template is="dom-if" if="{{recordings.list.length}}">
+                    <div message-holder>
+                        <p>Cargando...</p>
+                    </div>
+                </template>
+                <template is="dom-if" if="[[loading]]">
+                    <div spinner>
+                        <paper-spinner-lite active></paper-spinner-lite>
+                    </div>
+                </template>
+            </div>
+        </base-layout>
+    </template>
+    <script>
+        Polymer({
+            is: "recording-list",
+            observers: [],
+            behaviors: [],
+            properties: {
+                recordingList:{
+                    observer:'_updateList'
+                },
+                recordingId: {
+                    type: Number
+                },
+                recordingTitle: {
+                    type: String
+                }
+            },
+            _updateList: function(){
+                this.$.baseLayout.scrollTop() ;
+            },
+            _deleterecording: function(e){
+                var txt;
+                this.$.deleteDialog.message = "¿Seguro que desea eliminar " + e.detail.name + " de " + this.recordings.title + "?" ;
+                this.$.deleteDialog.open() ;
+            },
+            _editrecording: function(e){
+                var txt;
+                this.editTitle = e.detail.name ;
+                this.editCategory = e.detail.category ;
+                this.editDescription = e.detail.description
+                this.$.editDialog.open() ;
+            },
+            _loadData: function () {
+                if (this.first)
+                    this.$.ajaxExtra.generateRequest();
+                this.first = true;
+            },
+            _didRespond: function (e) {
+                var recordings = e.detail.response;
+                for (var i = 0; i < recordings.length; i++) {
+                    this.push('recordings.list', recordings[i]);
+                }
+            },
+            _iconAction: function (e) {
+                if (e.detail.which === 'exitIcon') {
+                    this.fire('close');
+                }
+            },
+            _menuAction: function (e) {
+                if (e.detail.item.id === 'cuenta')
+                    this.set('route.path', '/cuenta/estado');
+                if (e.detail.item.id === 'signout') {
+                    this.set('route.path', '/cuenta/exit');
+                }
+            },
+            _playrecording: function (e) {
+                // console.log(e.detail.id);
+            },
+            _showCollection: function (e) {
+                this.$.dialog.open();
+                this.recordingId = e.detail.id;
+                this.recordingTitle = e.detail.name;
+            },
+            _addToCollection: function (e) {
+                this.fire('toast', {
+                    msg: this.recordingTitle + ' se ha agregado a ' + e.detail.name
+                });
+                console.log(this.recordingId + " "+ e.detail.id);
+            },
+            ready: function () {
+                this.listen(this, 'lower-threshold', '_loadData');
+                Polymer.RenderStatus.afterNextRender(this, function () {
+                    this.listen(this, 'icon-click', '_iconAction');
+                    this.listen(this, 'iron-select', '_menuAction');
+                    this.listen(this, 'play-recording', '_playrecording');
+                    this.listen(this,'delete-recording','_deleterecording') ;
+                    this.listen(this,'edit-recording','_editrecording') ;
+                    this.listen(this,'select-collection','_addToCollection');
+                    this.listen(this,'addToCollection','_showCollection');
+                });
+            }
+        });
+    </script>
+</dom-module>
