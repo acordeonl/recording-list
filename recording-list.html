@@ -57,12 +57,12 @@ For an overlayed drop menu:
                     --paper-input-container-label: {
                         font-size: 16px;
                         font-weight: 300;
-                        color:var(--content-color) ;
+                        color:var(--content-color,#212121) ;
                     };
                     --paper-input-container-input: {
                         font-size: 18px;
                         font-weight: 300;
-                        color:var(--content-color) ;
+                        color:var(--content-color,#212121) ;
                     };
                 }
                 paper-textarea{
@@ -81,7 +81,7 @@ For an overlayed drop menu:
                     @apply(--layout-center-justified);
                     @apply(--layout-center);
                     margin-top: 20px;
-                    color:var(--content-color) ;
+                    color:var(--content-color,#212121) ;
                 }
                 [content] {
                     margin-top: 0;
@@ -183,7 +183,7 @@ For an overlayed drop menu:
                 var txt;
                 this.editTitle = e.detail.name ;
                 this.editCategory = e.detail.category ;
-                this.editDescription = e.detail.description
+                this.editDescription = e.detail.description ;
                 this.$.editDialog.open() ;
             },
             _loadData: function () {
