@@ -3,22 +3,22 @@
     <link rel="import" href="../ajax-manager/ajax-manager.html">
     <link rel="import" href="../paper-input/paper-input.html" >
     <link rel="import" href="../base-layout/base-layout.html">
-    <link rel="import" href="../iron-ajax/iron-ajax.html" async>
-    <link rel="import" href="../recording-card/recording-card.html" async>
-    <link rel="import" href="../collection-dialog/collection-dialog.html" async>
+    <link rel="import" href="../iron-ajax/iron-ajax.html">
+    <link rel="import" href="../recording-card/recording-card.html">
+    <link rel="import" href="../collection-dialog/collection-dialog.html">
     <link rel="import" href="../prompt-dialog/prompt-dialog.html">
-    <link rel="import" href="../paper-icon-button/paper-icon-button.html" async>
-    <link rel="import" href="../paper-input/paper-textarea.html" async>
-    <link rel="import" href="../paper-spinner/paper-spinner-lite.html" async>
-    <link rel="import" href="../iron-icon/iron-icon.html" async >
-    <link rel="import" href="../iron-icons/iron-icons.html" async>
+    <link rel="import" href="../paper-icon-button/paper-icon-button.html">
+    <link rel="import" href="../paper-input/paper-textarea.html">
+    <link rel="import" href="../paper-spinner/paper-spinner-lite.html">
+    <link rel="import" href="../iron-icon/iron-icon.html" >
+    <link rel="import" href="../iron-icons/iron-icons.html">
 </imports>
 <icon-imports >
-    <link rel="import" href="../iron-icons/hardware-icons.html" async>
-    <link rel="import" href="../iron-icons/social-icons.html" async>
-    <link rel="import" href="../iron-icons/image-icons.html" async>
-    <link rel="import" href="../iron-icons/av-icons.html" async>
-    <link rel="import" href="../iron-icons/communication-icons.html" async>
+    <link rel="import" href="../iron-icons/hardware-icons.html">
+    <link rel="import" href="../iron-icons/social-icons.html">
+    <link rel="import" href="../iron-icons/image-icons.html">
+    <link rel="import" href="../iron-icons/av-icons.html">
+    <link rel="import" href="../iron-icons/communication-icons.html">
 </icon-imports>
 <!--
 
@@ -169,9 +169,15 @@ For an overlayed drop menu:
                 },
                 recordingTitle: {
                     type: String
-                }
+                },
+                rendered:{
+                    type:Boolean,
+                    value:false
+                },
             },
             _updateList: function(){
+                if(!this.rendered)
+                    return ;
                 this.$.baseLayout.scrollTop() ;
             },
             _deleterecording: function(e){
@@ -224,8 +230,8 @@ For an overlayed drop menu:
                 console.log(this.recordingId + " "+ e.detail.id);
             },
             ready: function () {
-                this.listen(this, 'lower-threshold', '_loadData');
                 Polymer.RenderStatus.afterNextRender(this, function () {
+                    this.listen(this, 'lower-threshold', '_loadData');
                     this.listen(this, 'icon-click', '_iconAction');
                     this.listen(this, 'iron-select', '_menuAction');
                     this.listen(this, 'play-recording', '_playrecording');
@@ -233,6 +239,7 @@ For an overlayed drop menu:
                     this.listen(this,'edit-recording','_editrecording') ;
                     this.listen(this,'select-collection','_addToCollection');
                     this.listen(this,'addToCollection','_showCollection');
+                    this.rendered= true;
                 });
             }
         });
