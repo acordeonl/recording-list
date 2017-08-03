@@ -49,23 +49,23 @@ For an overlayed drop menu:
     <template>
         <styles >
             <style dialog>
-                [dialog-content]{
-                    width: 90% ;
+                [dialog-content] {
+                    width: 90%;
                 }
-                paper-input{
-                    margin-bottom: 10px ;
+                paper-input {
+                    margin-bottom: 10px;
                     --paper-input-container-label: {
                         font-size: 16px;
                         font-weight: 300;
-                        color:var(--content-color,#212121) ;
+                        color: var(--content-color,#212121);
                     };
                     --paper-input-container-input: {
                         font-size: 18px;
                         font-weight: 300;
-                        color:var(--content-color,#212121) ;
+                        color: var(--content-color,#212121);
                     };
                 }
-                paper-textarea{
+                paper-textarea {
                     font-size: 30px;
                     --iron-autogrow-textarea: {
                         font-size: 18px;
@@ -76,12 +76,12 @@ For an overlayed drop menu:
             <style >
                 [message-holder] {
                     width: 100%;
-                    font-size: 19px ;
+                    font-size: 19px;
                     @apply(--layout-horizontal);
                     @apply(--layout-center-justified);
                     @apply(--layout-center);
                     margin-top: 20px;
-                    color:var(--content-color,#212121) ;
+                    color: var(--content-color,#212121);
                 }
                 [content] {
                     margin-top: 0;
@@ -94,11 +94,16 @@ For an overlayed drop menu:
                     @apply(--layout-center-justified);
                     @apply(--layout-center);
                 }
-                [header]{
-                    width: 100% ;
+                [header] {
+                    width: 100%;
+                }
+                base-layout {
+                    --layout-color: var(--card-color,--theme-color1);
                 }
             </style>
         </styles>
+        <ajax-manager id="ajax" response={{recordings}} request="{{recordingList}}" loading={{loading}}></ajax-manager>
+        <iron-ajax id="ajaxExtra" url="http://localhost:3000/data/{{extra}}.json" handle-as="json" loading="{{loading}}" on-response="_didRespond"></iron-ajax>
         <dialogs >
             <prompt-dialog id="deleteDialog" confirm-button="eliminar" cancel-button="cancelar"></prompt-dialog>
             <prompt-dialog dialog-title="Editar grabaciòn" id="editDialog" confirm-button="editar" cancel-button="cancelar">
@@ -110,14 +115,12 @@ For an overlayed drop menu:
             </prompt-dialog>
             <collection-dialog parent={{recordingList}} id="dialog"></collection-dialog>
         </dialogs>
-        <ajax-manager id="ajax" response={{recordings}} request="{{recordingList}}" loading={{loading}}></ajax-manager>
-        <iron-ajax id="ajaxExtra" url="http://localhost:3000/data/{{extra}}.json" handle-as="json" loading="{{loading}}" on-response="_didRespond"></iron-ajax>
-        <base-layout id="baseLayout" exit-icon="{{exitIcon}}"  with-header$="{{withHeader}}" header="{{recordings.title}}">
+        <base-layout id="baseLayout" exit-icon="{{exitIcon}}" with-header$="{{withHeader}}" header="{{recordings.title}}">
             <div header>
                 <content select="[header]"></content>
             </div>
             <div content>
-                <template is="dom-if" if="[[!loading]]" >
+                <template is="dom-if" if="[[!loading]]">
                     <template is="dom-if" if="[[!recordings.list.length]]">
                         <div message-holder>
                             La lista esta vacia
@@ -161,36 +164,28 @@ For an overlayed drop menu:
             observers: [],
             behaviors: [],
             properties: {
-                recordingList:{
-                    observer:'_updateList'
-                },
                 recordingId: {
                     type: Number
                 },
                 recordingTitle: {
                     type: String
                 },
-                rendered:{
-                    type:Boolean,
-                    value:false
-                },
+                rendered: {
+                    type: Boolean,
+                    value: false
+                }
             },
-            _updateList: function(){
-                if(!this.rendered)
-                    return ;
-                this.$.baseLayout.scrollTop() ;
-            },
-            _deleterecording: function(e){
+            _deleterecording: function (e) {
                 var txt;
-                this.$.deleteDialog.message = "¿Seguro que desea eliminar " + e.detail.name + " de " + this.recordings.title + "?" ;
-                this.$.deleteDialog.open() ;
+                this.$.deleteDialog.message = "¿Seguro que desea eliminar " + e.detail.name + " de " + this.recordings.title + "?";
+                this.$.deleteDialog.open();
             },
-            _editrecording: function(e){
+            _editrecording: function (e) {
                 var txt;
-                this.editTitle = e.detail.name ;
-                this.editCategory = e.detail.category ;
-                this.editDescription = e.detail.description ;
-                this.$.editDialog.open() ;
+                this.editTitle = e.detail.name;
+                this.editCategory = e.detail.category;
+                this.editDescription = e.detail.description;
+                this.$.editDialog.open();
             },
             _loadData: function () {
                 if (this.first)
@@ -227,20 +222,20 @@ For an overlayed drop menu:
                 this.fire('toast', {
                     msg: this.recordingTitle + ' se ha agregado a ' + e.detail.name
                 });
-                console.log(this.recordingId + " "+ e.detail.id);
+                console.log(this.recordingId + " " + e.detail.id);
             },
             ready: function () {
-                Polymer.RenderStatus.afterNextRender(this, function () {
-                    this.listen(this, 'lower-threshold', '_loadData');
-                    this.listen(this, 'icon-click', '_iconAction');
-                    this.listen(this, 'iron-select', '_menuAction');
-                    this.listen(this, 'play-recording', '_playrecording');
-                    this.listen(this,'delete-recording','_deleterecording') ;
-                    this.listen(this,'edit-recording','_editrecording') ;
-                    this.listen(this,'select-collection','_addToCollection');
-                    this.listen(this,'addToCollection','_showCollection');
-                    this.rendered= true;
-                });
+                // Polymer.RenderStatus.afterNextRender(this, function () {
+                this.listen(this, 'lower-threshold', '_loadData');
+                this.listen(this, 'icon-click', '_iconAction');
+                this.listen(this, 'iron-select', '_menuAction');
+                this.listen(this, 'play-recording', '_playrecording');
+                this.listen(this, 'delete-recording', '_deleterecording');
+                this.listen(this, 'edit-recording', '_editrecording');
+                this.listen(this, 'select-collection', '_addToCollection');
+                this.listen(this, 'addToCollection', '_showCollection');
+                this.rendered = true;
+                // });
             }
         });
     </script>
